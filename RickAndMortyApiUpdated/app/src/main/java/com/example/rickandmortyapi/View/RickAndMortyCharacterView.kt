@@ -37,8 +37,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +55,7 @@ import com.example.rickandmortyapi.R
 @OptIn(ExperimentalMaterial3Api::class)
 fun CharacterScreen(viewModel: RickAndMortyCharacterViewModel = viewModel()) {
     val characters by viewModel.characters.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     Box(
         modifier = Modifier
@@ -72,7 +75,8 @@ fun CharacterScreen(viewModel: RickAndMortyCharacterViewModel = viewModel()) {
                     actions = {
                         Button(
                             onClick = { viewModel.fetchCharacters() } ,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A7C1))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A7C1)),
+                            modifier = Modifier.testTag("refreshButton")
                         ) {
                             Text("Обновить")
                             Icon(Icons.Default.Refresh, contentDescription = "Обновить")
@@ -81,12 +85,26 @@ fun CharacterScreen(viewModel: RickAndMortyCharacterViewModel = viewModel()) {
                 )
             },
         ) { innerPadding ->
-            if (characters.isEmpty()) {
+            if (errorMessage != null) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .align(Alignment.Center),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+
+            else if (characters.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
             } else {
                 CharacterList(characters, modifier = Modifier.padding(innerPadding))
             }
@@ -101,70 +119,47 @@ fun CharacterList(
 ) {
     LazyColumn(modifier = modifier) {
         items(characters) {
-            CharacterItem(it)
+            CharacterCard(
+                character = it,
+                modifier = when (it.species) {
+                    "Human" -> Modifier.size(64.dp).clip(CircleShape)
+                    "Alien" -> Modifier.size(64.dp).padding(8.dp)
+                    else ->  Modifier.size(64.dp).fillMaxWidth()
+                },
+                color = when (it.species) {
+                    "Human" -> Color.Gray.copy(0.25f)
+                    "Alien" -> Color.Green.copy(0.25f)
+                    else ->  Color.Blue.copy(0.25f)
+                }
+            )
         }
     }
 }
 
 @Composable
-fun CharacterItem(character: RickAndMortyCharacter) {
-    when (character.species) {
-        "Human" -> HumanCharacter(character)
-        "Alien" -> AlienCharacter(character)
-        else -> OtherCharacter(character)
-    }
-}
-
-@Composable
-fun HumanCharacter(character: RickAndMortyCharacter) {
-    CharacterCard(
-        character = character,
-        backgroundColor = Color(0xfff1cf),
-        imageShape = CircleShape
-    )
-}
-
-@Composable
-fun AlienCharacter(character: RickAndMortyCharacter) {
-    CharacterCard(
-        character = character,
-        backgroundColor = Color(0xff6bf0),
-        imageShape = RoundedCornerShape(12.dp)
-    )
-}
-
-@Composable
-fun OtherCharacter(character: RickAndMortyCharacter) {
-    CharacterCard(
-        character = character,
-        backgroundColor = Color(Color.Cyan.value),
-        imageShape = RoundedCornerShape(8.dp)
-    )
-}
-
-@Composable
-fun CharacterCard(character: RickAndMortyCharacter, backgroundColor: Color, imageShape: Shape) {
+fun CharacterCard(character: RickAndMortyCharacter, modifier: Modifier, color: Color) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
             .shadow(6.dp, shape = RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
-//        elevation = 6.dp
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(backgroundColor.copy(alpha = 0.6f))
+//                .background(backgroundColor.copy(alpha = 0.6f))
+                .background(color)
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = character.image,
                 contentDescription = character.name,
-                modifier = Modifier
+                modifier = modifier
                     .size(80.dp)
-                    .clip(imageShape)
+//                    .clip(imageShape)
+//                    .clip(CircleShape)
                     .background(Color.Gray.copy(alpha = 0.3f))
             )
             Spacer(modifier = Modifier.width(12.dp))
