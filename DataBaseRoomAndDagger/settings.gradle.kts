@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "DataBaseRoomAndDagger"
 include(":app")
+ 
