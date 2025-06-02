@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -235,7 +237,11 @@ fun ImageGenerationScreen(imageGenerationScreenViewModel: ImageGenerationScreenV
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Сохранить")
+                Icon(
+                    painter = painterResource(id = R.drawable.save),
+                    contentDescription = "Сохранить",
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
 
